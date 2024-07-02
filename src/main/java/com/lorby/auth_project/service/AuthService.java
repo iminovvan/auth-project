@@ -61,11 +61,9 @@ public class AuthService {
         log.info("User {} saved successfully", registerRequestDto.username());
         ConfirmationRequestDto confirmDto = new ConfirmationRequestDto(user.getUsername(), user.getEmail());
         sendConfirmationEmail(confirmDto);
-        //
     }
 
     public void sendConfirmationEmail(ConfirmationRequestDto confirmationRequestDto){
-        log.info("Sending confirmation email to: {}", confirmationRequestDto.email());
         Optional<User> user = userRepository.findByUsername(confirmationRequestDto.username());
         if(user.isEmpty()){
             throw new NotFoundException("User not found");
@@ -78,7 +76,6 @@ public class AuthService {
         String confirmationLink = baseUrl + "/api/auth/confirm?token=" + token.getToken();
         emailService.sendEmail(user.get().getEmail(), "Email Confirmation",
                 "Please click on the following link to confirm your email: <a href=\"" + confirmationLink + "\">Verify Email<a>");
-        log.info("Confirmation email sent to: {}", user.get().getEmail());
     }
 
     public void confirmEmail(String tokenValue) {
