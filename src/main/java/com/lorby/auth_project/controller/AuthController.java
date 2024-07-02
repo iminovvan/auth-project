@@ -5,6 +5,7 @@ import com.lorby.auth_project.entity.User;
 import com.lorby.auth_project.exception.NotFoundException;
 import com.lorby.auth_project.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -24,7 +25,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
-@Slf4j
 @Validated
 public class AuthController {
     private final AuthService authService;
@@ -33,7 +33,7 @@ public class AuthController {
             summary = "Register a new user",
             description = "Register a new user with email, username, and password. Send a confirmation link.",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "",
+                    description = "Register request DTO containing email, username, password, and password confirmation.",
                     required = true,
                     content = @Content(schema = @Schema(implementation = RegisterRequestDto.class))
             ),
@@ -45,36 +45,90 @@ public class AuthController {
     )
     @PostMapping("/register")
     public ResponseEntity<String> register(@Valid @RequestBody RegisterRequestDto registerRequestDto){
-        log.info("Register request received: {}", registerRequestDto);
         authService.register(registerRequestDto);
         return new ResponseEntity<>("Confirmation link sent to your email", HttpStatus.CREATED);
     }
 
+    @Operation(
+            summary = "Confirm email",
+            description = "Confirm a user's email using a token sent to his/her email address.",
+            parameters = @Parameter(
+                    name = "token",
+                    description = "Token sent to the user's email for confirmation",
+                    required = true,
+                    schema = @Schema(type = "string")
+            ),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Email confirmed successfully"),
+                    @ApiResponse(responseCode = "502", description = "Link is expired", content = @Content),
+                    @ApiResponse(responseCode = "404", description = "Invalid token", content = @Content),
+            }
+    )
     @GetMapping("/confirm")
     public ResponseEntity<String> confirmEmail(@RequestParam("token") String token) {
-        log.info("Email confirmation request received with token: {}", token);
         try {
             authService.confirmEmail(token);
             return new ResponseEntity<>("Email confirmed successfully", HttpStatus.OK);
         } catch (NotFoundException e) {
-            log.error("Error confirming email: {}", e.getMessage());
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
+    @Operation(
+            summary = "Resend confirmation email",
+            description = "Resend the confirmation email to the user.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Confirmation request DTO containing the user's email and username",
+                    required = true,
+                    content = @Content(schema = @Schema(implementation = ConfirmationRequestDto.class))
+            ),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Confirmation link resent to your email"),
+                    @ApiResponse(responseCode = "400", description = "Invalid email", content = @Content),
+                    @ApiResponse(responseCode = "409", description = "User is already confirmed", content = @Content),
+                    @ApiResponse(responseCode = "502", description = "Failed to send email", content = @Content)
+            }
+    )
     @PostMapping("/resend-confirmation")
     public ResponseEntity<String> resend(@RequestBody ConfirmationRequestDto confirmationRequestDto){
         authService.sendConfirmationEmail(confirmationRequestDto);
         return new ResponseEntity<>("Confirmation link resent to your email", HttpStatus.OK);
     }
 
+    @Operation(
+            summary = "User login",
+            description = "Authenticate a user and return access and refresh tokens.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Login request DTO containing username and password",
+                    required = true,
+                    content = @Content(schema = @Schema(implementation = LoginRequestDto.class))
+            ),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "User logged in successfully", content = @Content(schema = @Schema(implementation = LoginResponseDto.class))),
+                    @ApiResponse(responseCode = "400", description = "Invalid username or password", content = @Content),
+                    @ApiResponse(responseCode = "401", description = "Account has not been enabled. Confirm your email", content = @Content)
+            }
+    )
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDto> login(@RequestBody @Valid LoginRequestDto loginRequestDto){
         LoginResponseDto responseDto = authService.login(loginRequestDto);
         return ResponseEntity.ok(responseDto);
     }
 
-    @PostMapping("/refresh")
+    @Operation(
+            summary = "Refresh access token",
+            description = "Refresh the access token using a valid refresh token.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Refresh request DTO containing the refresh token",
+                    required = true,
+                    content = @Content(schema = @Schema(implementation = RefreshRequestDto.class))
+            ),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Access token refreshed successfully", content = @Content(schema = @Schema(implementation = LoginResponseDto.class))),
+                    @ApiResponse(responseCode = "401", description = "Refresh token is expired or invalid", content = @Content)
+            }
+    )
+    @PostMapping("/refresh-token")
     public ResponseEntity<LoginResponseDto> refresh(@RequestBody RefreshRequestDto refreshRequestDto){
         LoginResponseDto response = authService.refreshToken(refreshRequestDto.refreshToken());
         return ResponseEntity.ok(response);

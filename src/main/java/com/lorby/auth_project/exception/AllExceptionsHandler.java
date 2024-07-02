@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
-@Slf4j
 public class AllExceptionsHandler {
     @ExceptionHandler(UsernameExistsException.class)
     public ResponseEntity<String> handleUsernameExistsException(UsernameExistsException ex){
@@ -42,7 +41,7 @@ public class AllExceptionsHandler {
 
     @ExceptionHandler(TokenExpiredException.class)
     public ResponseEntity<String> handleTokenExpiredException(TokenExpiredException ex){
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_GATEWAY);
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -71,11 +70,11 @@ public class AllExceptionsHandler {
 
     @ExceptionHandler(InvalidCredentialsException.class)
     public ResponseEntity<String> handleInvalidCredentialsException(InvalidCredentialsException ex){
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_GATEWAY);
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(TokenValidationException.class)
     public ResponseEntity<String> handleTokenValidationException(TokenValidationException ex){
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_GATEWAY);
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.UNAUTHORIZED);
     }
 }
