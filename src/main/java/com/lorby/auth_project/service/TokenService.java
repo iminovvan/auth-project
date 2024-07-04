@@ -22,10 +22,9 @@ public class TokenService {
     private final TokenRepository tokenRepository;
     private final JwtService jwtService;
     private final UserRepository userRepository;
-    private static final long BASE_EXPIRATION_MINUTES = 2;
+    private static final long BASE_EXPIRATION_MINUTES = 5;
     private static final long EMAIL_VERIFICATION_EXPIRATION = BASE_EXPIRATION_MINUTES * 3; // 15 minutes
-    private static final long PASSWORD_RESET_EXPIRATION = BASE_EXPIRATION_MINUTES * 12; // 1 hour
-    private static final long ACCESS_TOKEN_EXPIRATION = BASE_EXPIRATION_MINUTES; // 15 minutes
+    private static final long ACCESS_TOKEN_EXPIRATION = BASE_EXPIRATION_MINUTES * 3; // 15 minutes
     private static final long REFRESH_TOKEN_EXPIRATION = BASE_EXPIRATION_MINUTES * 288; // 24 hours
 
     public Token generateToken(User user, TokenType tokenType){
@@ -33,9 +32,6 @@ public class TokenService {
         switch (tokenType) {
             case EMAIL_CONFIRMATION:
                 expirationMinutes = EMAIL_VERIFICATION_EXPIRATION;
-                break;
-            case PASSWORD_RESET:
-                expirationMinutes = PASSWORD_RESET_EXPIRATION;
                 break;
             case REFRESH_TOKEN:
                 expirationMinutes = REFRESH_TOKEN_EXPIRATION;
