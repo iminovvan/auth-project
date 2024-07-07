@@ -53,7 +53,7 @@ public class SecurityConfig {
                                 .requestMatchers("/api/auth/register", "/api/auth/confirm/**",
                                         "/api/auth/resend-confirmation")
                                 .permitAll()
-                                .requestMatchers("/api/auth/login", "/api/auth/refresh-token").permitAll()
+                                .requestMatchers("/api/auth/login", "/api/auth/refresh-token", "/api/test/smtp-connection").permitAll()
                                 .requestMatchers("/api/test/protected").authenticated()
                                 .requestMatchers(
                                         "/v2/api-docs",
