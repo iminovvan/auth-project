@@ -25,6 +25,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,7 +42,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
     private final TokenRepository tokenRepository;
-    public void register(RegisterRequestDto registerRequestDto){
+    public void register(RegisterRequestDto registerRequestDto) {
         log.info("Registering user: {}", registerRequestDto.username());
         if(userRepository.findByUsername(registerRequestDto.username()).isPresent()){
             throw new UsernameExistsException("Username already exists");
@@ -74,9 +76,20 @@ public class AuthService {
         Token token = tokenService.generateToken(user.get(), TokenType.EMAIL_CONFIRMATION);
         String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
         String confirmationLink = baseUrl + "/api/auth/confirm?token=" + token.getToken();
-        emailService.sendEmail(user.get().getEmail(), "Email testing", "Hello");
-        //emailService.sendEmail(user.get().getEmail(), "Email Confirmation",
-                //"Please click on the following link to confirm your email: <a href=\"" + confirmationLink + "\">Verify Email<a>");
+
+        /*
+        emailService.sendEmail(user.get().getEmail(), "Email Confirmation",
+                "Please click on the following link to confirm your email: <a href=\"" + confirmationLink + "\">Verify Email<a>");
+
+         */
+        String confirmationUrl = "http://auth-project-production-d0e6.up.railway.app/api/auth/confirm?token=" + token;
+        String htmlContent = "<html><body>" +
+                "<p>Hello,</p>" +
+                "<p>Please click the link below to confirm your email address:</p>" +
+                "<p><a href=\"" + confirmationUrl + "\">Verify Email</a></p>" +
+                "<p>If you did not register, please ignore this email.</p>" +
+                "</body></html>";
+        emailService.sendEmail(user.get().getEmail(), "Email Confirmation", htmlContent);
     }
 
     public void confirmEmail(String tokenValue) {
