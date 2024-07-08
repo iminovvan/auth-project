@@ -92,7 +92,7 @@ public class AuthService {
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException("Failed to encode URL", e);
         }
-        String content = "Please click on the following link to confirm your email: " + confirmationLink;
+        String content = "Please click on the following link to confirm your email: ";
         emailService.sendEmail(user.get().getEmail(), "Email Confirmation", content);
     }
 
