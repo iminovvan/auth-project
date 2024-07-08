@@ -23,6 +23,8 @@ public class EmailService {
     @Value("${EMAIL_USERNAME}")
     private String from;
     public void sendEmail(String to, String subject, String text){
+        logger.debug("EMAIL_USERNAME: {}", System.getenv("EMAIL_USERNAME"));
+        logger.debug("EMAIL_PASSWORD: {}", System.getenv("EMAIL_PASSWORD"));
         try{
             logger.info("Sending email to: {}", to);
             MimeMessage message = emailSender.createMimeMessage();
@@ -37,6 +39,7 @@ public class EmailService {
             logger.info("Email sent successfully to: {}", to);
         } catch (MessagingException ex){
             logger.error("Failed to send email to: {}", to, ex);
+            ex.printStackTrace();
             throw new MailSendException("Failed to send email");
         }
     }
