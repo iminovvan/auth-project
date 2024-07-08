@@ -86,7 +86,12 @@ public class AuthService {
             throw new RuntimeException("Failed to encode URL", e);
         }
          */
-        String confirmationLink = baseUrl + "?=token" + token.getToken();
+        String confirmationLink;
+        try {
+            confirmationLink = "http://auth-project-production-d0e6.up.railway.app/api/auth/confirm?token=" + URLEncoder.encode(token.getToken(), StandardCharsets.UTF_8.toString());
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException("Failed to encode URL", e);
+        }
         String content = "Please click on the following link to confirm your email: " + confirmationLink;
         emailService.sendEmail(user.get().getEmail(), "Email Confirmation", content);
     }
