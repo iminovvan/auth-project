@@ -27,6 +27,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
@@ -75,18 +76,22 @@ public class AuthService {
         }
         Token token = tokenService.generateToken(user.get(), TokenType.EMAIL_CONFIRMATION);
         String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
-        String confirmationLink = baseUrl + "/api/auth/confirm?token=" + token.getToken();
-
         /*
         emailService.sendEmail(user.get().getEmail(), "Email Confirmation",
                 "Please click on the following link to confirm your email: <a href=\"" + confirmationLink + "\">Verify Email<a>");
 
          */
-        String confirmationUrl = "http://auth-project-production-d0e6.up.railway.app/api/auth/confirm?token=" + token.getToken();
+        String confirmationLink;
+        try {
+            confirmationLink = baseUrl + "?token=" + URLEncoder.encode(token.getToken(), StandardCharsets.UTF_8.toString());
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException("Failed to encode URL", e);
+        }
+        //String confirmationUrl = "http://auth-project-production-d0e6.up.railway.app/api/auth/confirm?token=" + token.getToken();
         String htmlContent = "<html><body>" +
                 "<p>Hello,</p>" +
                 "<p>Please click the link below to confirm your email address:</p>" +
-                "<p><a href=\"" + confirmationUrl + "\">Verify Email</a></p>" +
+                "<p><a href=\"" + confirmationLink + "\">Verify Email</a></p>" +
                 "<p>If you did not register, please ignore this email.</p>" +
                 "</body></html>";
         emailService.sendEmail(user.get().getEmail(), "Email Confirmation", htmlContent);
