@@ -74,8 +74,9 @@ public class AuthService {
         Token token = tokenService.generateToken(user.get(), TokenType.EMAIL_CONFIRMATION);
         String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
         String confirmationLink = baseUrl + "/api/auth/confirm?token=" + token.getToken();
-        emailService.sendEmail(user.get().getEmail(), "Email Confirmation",
-                "Please click on the following link to confirm your email: <a href=\"" + confirmationLink + "\">Verify Email<a>");
+        emailService.sendEmail(user.get().getEmail(), "Email testing", "Hello");
+        //emailService.sendEmail(user.get().getEmail(), "Email Confirmation",
+                //"Please click on the following link to confirm your email: <a href=\"" + confirmationLink + "\">Verify Email<a>");
     }
 
     public void confirmEmail(String tokenValue) {
