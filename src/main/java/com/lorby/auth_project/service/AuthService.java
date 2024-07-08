@@ -82,7 +82,7 @@ public class AuthService {
                 "Please click on the following link to confirm your email: <a href=\"" + confirmationLink + "\">Verify Email<a>");
 
          */
-        String confirmationUrl = "http://auth-project-production-d0e6.up.railway.app/api/auth/confirm?token=" + token;
+        String confirmationUrl = "http://auth-project-production-d0e6.up.railway.app/api/auth/confirm?token=" + token.getToken();
         String htmlContent = "<html><body>" +
                 "<p>Hello,</p>" +
                 "<p>Please click the link below to confirm your email address:</p>" +
