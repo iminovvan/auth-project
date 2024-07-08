@@ -79,14 +79,14 @@ public class AuthService {
         /*
         emailService.sendEmail(user.get().getEmail(), "Email Confirmation",
                 "Please click on the following link to confirm your email: <a href=\"" + confirmationLink + "\">Verify Email<a>");
-
-         */
-        String confirmationLink;
+                String confirmationLink;
         try {
-            confirmationLink = baseUrl + "?token=" + URLEncoder.encode(token.getToken(), StandardCharsets.UTF_8.toString());
+            confirmationLink = baseUrl + "?token=" + URLEncoder.encode(token.getToken(), StandardCharsets.UTF_8.toString();
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException("Failed to encode URL", e);
         }
+         */
+        String confirmationLink = baseUrl + "?=token" + token.getToken();
         String content = "Please click on the following link to confirm your email: " + confirmationLink;
         emailService.sendEmail(user.get().getEmail(), "Email Confirmation", content);
     }
