@@ -3,25 +3,25 @@ package com.lorby.auth_project.service;
 import com.lorby.auth_project.entity.Token;
 import com.lorby.auth_project.entity.User;
 import com.lorby.auth_project.entity.enums.TokenType;
-import com.lorby.auth_project.exception.NotFoundException;
 import com.lorby.auth_project.exception.TokenExpiredException;
 import com.lorby.auth_project.repository.TokenRepository;
-import com.lorby.auth_project.repository.UserRepository;
 import com.lorby.auth_project.util.JwtService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TokenService {
     private final TokenRepository tokenRepository;
     private final JwtService jwtService;
-    private final UserRepository userRepository;
+
     private static final long BASE_EXPIRATION_MINUTES = 5;
     private static final long EMAIL_VERIFICATION_EXPIRATION = BASE_EXPIRATION_MINUTES * 3; // 15 minutes
     private static final long ACCESS_TOKEN_EXPIRATION = BASE_EXPIRATION_MINUTES * 3; // 15 minutes
@@ -63,6 +63,11 @@ public class TokenService {
             throw new TokenExpiredException("Token is expired");
         }
         return token;
+    }
+
+    @Transactional
+    public void invalidateToken(String tokenValue) {
+        tokenRepository.deleteByToken(tokenValue);
     }
 
 }

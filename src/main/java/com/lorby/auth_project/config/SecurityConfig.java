@@ -39,6 +39,7 @@ public class SecurityConfig {
         corsConfiguration.addAllowedMethod("*");
         corsConfiguration.addAllowedHeader("*");
         corsConfiguration.addAllowedOrigin("http://localhost:3000");
+        corsConfiguration.addAllowedOrigin("http://localhost:8080");
         corsConfiguration.addAllowedOrigin("*");
         UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
         urlBasedCorsConfigurationSource.registerCorsConfiguration("/**", corsConfiguration);
@@ -55,7 +56,7 @@ public class SecurityConfig {
                                         "/api/auth/resend-confirmation")
                                 .permitAll()
                                 .requestMatchers("/api/auth/login", "/api/auth/refresh-token", "/api/test/smtp-connection").permitAll()
-                                .requestMatchers("/api/test/protected").authenticated()
+                                .requestMatchers("/api/test/protected", "/api/auth/logout").authenticated()
                                 .requestMatchers(
                                         "/v2/api-docs",
                                         "/v3/api-docs/**",

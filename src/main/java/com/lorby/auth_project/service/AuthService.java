@@ -1,5 +1,8 @@
 package com.lorby.auth_project.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lorby.auth_project.dto.ConfirmationRequestDto;
 import com.lorby.auth_project.dto.LoginRequestDto;
 import com.lorby.auth_project.dto.LoginResponseDto;
@@ -12,6 +15,7 @@ import com.lorby.auth_project.exception.*;
 import com.lorby.auth_project.repository.RoleRepository;
 import com.lorby.auth_project.repository.TokenRepository;
 import com.lorby.auth_project.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +27,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.HttpServletBean;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.UnsupportedEncodingException;
@@ -84,16 +89,14 @@ public class AuthService {
             confirmationLink = baseUrl + "?token=" + URLEncoder.encode(token.getToken(), StandardCharsets.UTF_8.toString();
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException("Failed to encode URL", e);
-        }
-         */
-        String confirmationLink;
-        try {
-            confirmationLink = "http://auth-project-production-d0e6.up.railway.app/api/auth/confirm?token=" + URLEncoder.encode(token.getToken(), StandardCharsets.UTF_8.toString());
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException("Failed to encode URL", e);
-        }
+           String confirmationLink;
         String content = "Please click on the following link to confirm your email: " + confirmationLink;
         emailService.sendEmail(user.get().getEmail(), "Email Confirmation", content);
+         */
+        String confirmationLink = baseUrl + "/api/auth/confirm?token=" + token.getToken();
+        emailService.sendEmail(user.get().getEmail(), "Email Confirmation",
+                "Please click on the following link to confirm your email: " + confirmationLink);
+
     }
 
     public void confirmEmail(String tokenValue) {
@@ -155,4 +158,20 @@ public class AuthService {
         return new LoginResponseDto(newAccessToken, newRefreshToken);
     }
 
+    public void logout(String refreshToken, HttpServletRequest request) {
+        final String accessToken = request.getHeader("Authorization").replace("Bearer ", "");
+        tokenService.invalidateToken(accessToken);
+        String refreshTokenString = extractRefreshToken(refreshToken);
+        tokenService.invalidateToken(refreshTokenString);
+    }
+
+    private String extractRefreshToken(String refreshTokenJson) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode jsonNode = objectMapper.readTree(refreshTokenJson);
+            return jsonNode.get("refreshToken").asText();
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Invalid refresh token JSON");
+        }
+    }
 }
