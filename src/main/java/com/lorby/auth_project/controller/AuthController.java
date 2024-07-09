@@ -4,12 +4,14 @@ import com.lorby.auth_project.dto.*;
 import com.lorby.auth_project.entity.User;
 import com.lorby.auth_project.exception.NotFoundException;
 import com.lorby.auth_project.service.AuthService;
+import com.lorby.auth_project.service.TokenService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +30,7 @@ import org.springframework.web.bind.annotation.*;
 @Validated
 public class AuthController {
     private final AuthService authService;
+    private final TokenService tokenService;
 
     @Operation(
             summary = "Register a new user",
@@ -132,6 +135,22 @@ public class AuthController {
     public ResponseEntity<LoginResponseDto> refresh(@RequestBody RefreshRequestDto refreshRequestDto){
         LoginResponseDto response = authService.refreshToken(refreshRequestDto.refreshToken());
         return ResponseEntity.ok(response);
+    }
+
+
+
+    @Operation(
+            summary = "Invalidate refresh token",
+            description = "Accepts refresh token string for invalidation",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Logged out successfully"),
+                    @ApiResponse(responseCode = "401", description = "Invalid token")
+            }
+    )
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(@RequestBody String refreshToken, HttpServletRequest request) {
+        authService.logout(refreshToken, request);
+        return ResponseEntity.ok("Logged out successfully");
     }
 
 }
